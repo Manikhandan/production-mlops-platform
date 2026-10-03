@@ -1,0 +1,42 @@
+# Canary track: a second Deployment selected by a subset of Service traffic.
+# Apply after a Staging promotion. Shift traffic by adjusting the Service selector
+# or an ingress weight — this manifest stays at 1 replica on track=canary.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-platform-canary
+  namespace: mlops-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlops-platform
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: mlops-platform
+        track: canary
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: api
+          image: ghcr.io/example/mlops-platform:replace-me
+          env:
+            - name: MLOPS_STAGE
+              value: Staging
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

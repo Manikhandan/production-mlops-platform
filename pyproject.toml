@@ -1,0 +1,40 @@
+[project]
+name = "production-mlops-platform"
+version = "1.0.0"
+description = "Train, register, promote, and serve a tabular model with quality gates, metrics, and Kubernetes manifests."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "scikit-learn>=1.5",
+  "joblib>=1.4",
+  "prometheus-client>=0.21",
+  "numpy>=2.0",
+  "pydantic-settings>=2.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+mlflow = ["mlflow>=2.16"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "UP017", "B011"]

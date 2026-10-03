@@ -1,0 +1,17 @@
+global:
+  min_roc_auc: 0.85
+  drift_alert_psi: 0.2
+  stage: Production
+  algorithm: logreg
+features:
+  - amount
+  - velocity
+  - account_age_days
+  - channel
+  - region
+promotion:
+  required_stage_before_production: Staging
+  archive_previous_production: true
+rollback:
+  method: promote_previous_version
+  note: Re-run scripts/promote.py with the last known-good version, then POST /v1/reload.

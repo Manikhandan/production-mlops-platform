@@ -1,0 +1,46 @@
+services:
+  train:
+    build: .
+    command: ["python", "scripts/train.py"]
+    volumes:
+      - models:/app/models
+      - data:/app/data
+    environment:
+      MLOPS_REGISTRY_DIR: /app/models/registry
+      MLOPS_DATA_DIR: /app/data
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      train:
+        condition: service_completed_successfully
+    volumes:
+      - models:/app/models
+      - var:/app/var
+    environment:
+      MLOPS_REGISTRY_DIR: /app/models/registry
+      MLOPS_STAGE: Production
+      MLOPS_REQUEST_LOG_PATH: /app/var/predictions.jsonl
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+  grafana:
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  models:
+  data:
+  var:

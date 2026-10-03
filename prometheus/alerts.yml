@@ -1,0 +1,19 @@
+groups:
+  - name: mlops-platform
+    rules:
+      - alert: HighInferenceErrorRate
+        expr: sum(rate(ml_errors_total[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: Inference error rate is elevated.
+          action: Check /ready, recent prediction logs, and last promotion.
+      - alert: FeatureDriftPSI
+        expr: ml_requests_total > 0
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: Check /v1/drift. Prometheus cannot see PSI until it is exported as a gauge.
+          action: If psi_mean exceeds 0.2, hold promotions and run scripts/train.py on a fresh window.
